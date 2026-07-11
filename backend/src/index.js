@@ -6,6 +6,7 @@ const { connectDatabase } = require('./database/connection');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const authRoutes = require('./routes/authRoutes');
+const bookRoutes = require('./routes/bookRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/books', bookRoutes);
 
 // Error handler
 app.use(errorHandler);

@@ -38,6 +38,9 @@
 
     <div class="navbar__actions">
       {#if auth.isAuthenticated}
+        <a href="/books" class="navbar__btn navbar__btn--ghost navbar__btn--books" id="navbar-books-link">
+          📚 Buku
+        </a>
         <span class="navbar__user">
           <span class="navbar__user-avatar">{auth.user?.nama?.charAt(0)?.toUpperCase() || 'U'}</span>
           <span class="navbar__user-name">{auth.user?.nama || 'Pengguna'}</span>
@@ -174,6 +177,17 @@
   .navbar__btn--ghost:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #f1f5f9;
+  }
+
+  .navbar__btn--books {
+    color: #a5b4fc;
+    border-color: rgba(129, 140, 248, 0.2);
+  }
+
+  .navbar__btn--books:hover {
+    background: rgba(129, 140, 248, 0.12);
+    color: #c7d2fe;
+    border-color: rgba(129, 140, 248, 0.4);
   }
 
   .navbar__btn--logout {

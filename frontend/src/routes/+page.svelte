@@ -76,11 +76,21 @@
         </div>
 
         <div class="feature-card" id="feature-books">
-          <div class="feature-card__icon">📖</div>
-          <h3 class="feature-card__title">Manajemen Buku</h3>
-          <p class="feature-card__desc">
-            Kelola koleksi buku perpustakaan dengan data judul, tahun terbit, stok, penulis, dan kategori.
-          </p>
+          {#if auth.isAuthenticated}
+            <a href="/books" class="feature-card__link" aria-label="Pergi ke manajemen buku">
+              <div class="feature-card__icon">📖</div>
+              <h3 class="feature-card__title">Manajemen Buku</h3>
+              <p class="feature-card__desc">
+                Kelola koleksi buku perpustakaan dengan data judul, tahun terbit, stok, penulis, dan kategori.
+              </p>
+            </a>
+          {:else}
+            <div class="feature-card__icon">📖</div>
+            <h3 class="feature-card__title">Manajemen Buku</h3>
+            <p class="feature-card__desc">
+              Kelola koleksi buku perpustakaan dengan data judul, tahun terbit, stok, penulis, dan kategori.
+            </p>
+          {/if}
         </div>
 
         <div class="feature-card" id="feature-authors">
@@ -367,6 +377,12 @@
     border-color: rgba(129, 140, 248, 0.3);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     background: rgba(30, 41, 59, 0.8);
+  }
+
+  .feature-card__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
   }
 
   .feature-card__icon {
