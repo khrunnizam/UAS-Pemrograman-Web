@@ -1,11 +1,44 @@
 <script>
+  import { onMount } from 'svelte';
   import { authStore } from '$lib/stores/auth.js';
+  import { dashboardService } from '$lib/services/dashboardService.js';
 
   let auth = $state({ user: null, token: null, isAuthenticated: false });
 
   authStore.subscribe((value) => {
     auth = value;
   });
+
+  // Dashboard stats state
+  let stats = $state(null);
+  let isLoadingStats = $state(false);
+  let statsError = $state(null);
+
+  onMount(async () => {
+    if (auth.isAuthenticated) {
+      await fetchStats();
+    }
+  });
+
+  // Re-fetch ketika auth berubah (misal: baru login)
+  $effect(() => {
+    if (auth.isAuthenticated && stats === null && !isLoadingStats) {
+      fetchStats();
+    }
+  });
+
+  async function fetchStats() {
+    isLoadingStats = true;
+    statsError = null;
+    try {
+      const res = await dashboardService.getStats();
+      stats = res.data;
+    } catch (err) {
+      statsError = err.message || 'Gagal memuat statistik';
+    } finally {
+      isLoadingStats = false;
+    }
+  }
 </script>
 
 <svelte:head>
@@ -60,8 +93,93 @@
     </div>
   </section>
 
+  <!-- Dashboard Stats Section — hanya tampil saat sudah login -->
+  {#if auth.isAuthenticated}
+    <section class="dashboard-stats" id="dashboard-stats">
+      <div class="dashboard-stats__container">
+        <div class="dashboard-stats__header">
+          <h2 class="dashboard-stats__title">📊 Statistik Perpustakaan</h2>
+          <p class="dashboard-stats__subtitle">Ringkasan data koleksi saat ini</p>
+        </div>
+
+        {#if isLoadingStats}
+          <!-- Loading State -->
+          <div class="stats-loading" id="stats-loading">
+            <div class="stats-grid">
+              {#each [1, 2, 3] as _}
+                <div class="stat-card stat-card--skeleton">
+                  <div class="skeleton skeleton--icon"></div>
+                  <div class="skeleton skeleton--num"></div>
+                  <div class="skeleton skeleton--label"></div>
+                </div>
+              {/each}
+            </div>
+          </div>
+
+        {:else if statsError}
+          <!-- Error State -->
+          <div class="stats-error" id="stats-error">
+            <span class="stats-error__icon">⚠️</span>
+            <p class="stats-error__text">{statsError}</p>
+            <button class="btn btn--ghost" onclick={fetchStats}>Coba Lagi</button>
+          </div>
+
+        {:else if stats}
+          <!-- Stats Cards -->
+          <div class="stats-grid" id="stats-grid">
+            <!-- Total Buku -->
+            <div class="stat-card" id="stat-total-buku">
+              <div class="stat-card__icon stat-card__icon--books">📖</div>
+              <div class="stat-card__num">
+                {stats.totalBuku > 0 ? stats.totalBuku : '—'}
+              </div>
+              <div class="stat-card__label">Total Buku</div>
+              {#if stats.totalBuku === 0}
+                <p class="stat-card__empty">Belum ada buku</p>
+              {/if}
+            </div>
+
+            <!-- Total Penulis -->
+            <div class="stat-card" id="stat-total-penulis">
+              <div class="stat-card__icon stat-card__icon--authors">✍️</div>
+              <div class="stat-card__num">
+                {stats.totalPenulis > 0 ? stats.totalPenulis : '—'}
+              </div>
+              <div class="stat-card__label">Total Penulis</div>
+              {#if stats.totalPenulis === 0}
+                <p class="stat-card__empty">Belum ada penulis</p>
+              {/if}
+            </div>
+
+            <!-- Total Kategori -->
+            <div class="stat-card" id="stat-total-kategori">
+              <div class="stat-card__icon stat-card__icon--categories">🏷️</div>
+              <div class="stat-card__num">
+                {stats.totalKategori > 0 ? stats.totalKategori : '—'}
+              </div>
+              <div class="stat-card__label">Total Kategori</div>
+              {#if stats.totalKategori === 0}
+                <p class="stat-card__empty">Belum ada kategori</p>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Empty State (semua 0) -->
+          {#if stats.totalBuku === 0 && stats.totalPenulis === 0 && stats.totalKategori === 0}
+            <div class="stats-empty" id="stats-empty">
+              <span class="stats-empty__icon">📭</span>
+              <p class="stats-empty__text">Perpustakaan masih kosong. Mulai tambahkan data buku, penulis, dan kategori!</p>
+              <a href="/books" class="btn btn--primary" id="stats-goto-books">Mulai Tambah Buku →</a>
+            </div>
+          {/if}
+        {/if}
+      </div>
+    </section>
+  {/if}
+
   <!-- Features Section -->
   <section class="features">
+
     <div class="features__container">
       <h2 class="features__title">Fitur Unggulan</h2>
       <p class="features__subtitle">Semua yang Anda butuhkan dalam satu platform</p>
@@ -454,4 +572,159 @@
   .tech-item__icon {
     font-size: 1rem;
   }
+
+  /* ─── Dashboard Stats Section ─────────────────────────────────── */
+  .dashboard-stats {
+    padding: 3rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .dashboard-stats__container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .dashboard-stats__header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-stats__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 0.375rem;
+  }
+
+  .dashboard-stats__subtitle {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (max-width: 600px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Stat Card */
+  .stat-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(129, 140, 248, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    background: rgba(30, 41, 59, 0.8);
+  }
+
+  .stat-card__icon {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-card__num {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #f1f5f9;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-card__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .stat-card__empty {
+    font-size: 0.78rem;
+    color: #475569;
+    font-style: italic;
+  }
+
+  /* Icon accent colors */
+  .stat-card__icon--books  { filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.5)); }
+  .stat-card__icon--authors { filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.5)); }
+  .stat-card__icon--categories { filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5)); }
+
+  /* Skeleton Loading */
+  .stat-card--skeleton {
+    pointer-events: none;
+    gap: 0.75rem;
+  }
+
+  .skeleton {
+    border-radius: 0.5rem;
+    background: linear-gradient(90deg,
+      rgba(255,255,255,0.04) 25%,
+      rgba(255,255,255,0.09) 50%,
+      rgba(255,255,255,0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+  }
+
+  .skeleton--icon  { width: 2.5rem; height: 2.5rem; border-radius: 50%; }
+  .skeleton--num   { width: 5rem; height: 2.5rem; }
+  .skeleton--label { width: 4rem; height: 0.875rem; }
+
+  /* Error State */
+  .stats-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2.5rem;
+    text-align: center;
+  }
+
+  .stats-error__icon { font-size: 2rem; }
+  .stats-error__text { color: #94a3b8; font-size: 0.9rem; }
+
+  /* Empty State (semua 0) */
+  .stats-empty {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .stats-empty__icon { font-size: 2rem; }
+  .stats-empty__text {
+    color: #64748b;
+    font-size: 0.9rem;
+    max-width: 360px;
+    line-height: 1.6;
+  }
 </style>
+

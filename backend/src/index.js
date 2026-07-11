@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const authorRoutes = require('./routes/authorRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/authors', authorRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handler
 app.use(errorHandler);
