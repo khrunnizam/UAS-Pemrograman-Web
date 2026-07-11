@@ -238,6 +238,13 @@
       </button>
     </div>
 
+    <!-- Nav Tabs -->
+    <div class="nav-tabs">
+      <a href="/books" class="nav-tab nav-tab--active" id="tab-books">📖 Buku</a>
+      <a href="/authors" class="nav-tab" id="tab-authors">✍️ Penulis</a>
+      <a href="/categories" class="nav-tab" id="tab-categories">🏷️ Kategori</a>
+    </div>
+
     <!-- Search Bar -->
     <div class="search-bar">
       <span class="search-bar__icon" aria-hidden="true">🔍</span>

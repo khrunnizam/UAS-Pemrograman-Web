@@ -38,13 +38,21 @@
 
     <div class="navbar__actions">
       {#if auth.isAuthenticated}
-        <a href="/books" class="navbar__btn navbar__btn--ghost navbar__btn--books" id="navbar-books-link">
-          📚 Buku
-        </a>
-        <span class="navbar__user">
+        <nav class="navbar__nav" aria-label="Menu utama">
+          <a href="/books" class="navbar__nav-link" id="navbar-books-link">
+            📚 Buku
+          </a>
+          <a href="/authors" class="navbar__nav-link" id="navbar-authors-link">
+            ✍️ Penulis
+          </a>
+          <a href="/categories" class="navbar__nav-link" id="navbar-categories-link">
+            🏷️ Kategori
+          </a>
+        </nav>
+        <a href="/profile" class="navbar__user" id="navbar-profile-link" title="Lihat profil">
           <span class="navbar__user-avatar">{auth.user?.nama?.charAt(0)?.toUpperCase() || 'U'}</span>
           <span class="navbar__user-name">{auth.user?.nama || 'Pengguna'}</span>
-        </span>
+        </a>
         <button
           class="navbar__btn navbar__btn--logout"
           onclick={handleLogout}
@@ -113,12 +121,50 @@
     gap: 0.75rem;
   }
 
+  /* Horizontal nav links */
+  .navbar__nav {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .navbar__nav {
+      display: flex;
+    }
+  }
+
+  .navbar__nav-link {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .navbar__nav-link:hover {
+    color: #c7d2fe;
+    background: rgba(129, 140, 248, 0.1);
+    border-color: rgba(129, 140, 248, 0.2);
+  }
+
+  /* User avatar (now a link) */
   .navbar__user {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     color: #cbd5e1;
     font-size: 0.875rem;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .navbar__user:hover {
+    opacity: 0.8;
   }
 
   .navbar__user-avatar {
@@ -132,6 +178,7 @@
     font-weight: 700;
     font-size: 0.8rem;
     color: white;
+    flex-shrink: 0;
   }
 
   .navbar__user-name {
@@ -177,17 +224,6 @@
   .navbar__btn--ghost:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #f1f5f9;
-  }
-
-  .navbar__btn--books {
-    color: #a5b4fc;
-    border-color: rgba(129, 140, 248, 0.2);
-  }
-
-  .navbar__btn--books:hover {
-    background: rgba(129, 140, 248, 0.12);
-    color: #c7d2fe;
-    border-color: rgba(129, 140, 248, 0.4);
   }
 
   .navbar__btn--logout {

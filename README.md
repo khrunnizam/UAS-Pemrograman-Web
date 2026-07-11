@@ -19,14 +19,14 @@ Aplikasi Full Stack untuk mengelola data perpustakaan.
 Pastikan MariaDB sudah berjalan dan buat database:
 
 ```sql
-CREATE DATABASE perpustakaan;
+CREATE DATABASE perpustakaan_db;
 ```
 
 ### 2. Backend
 
 ```bash
 cd backend
-cp .env.example .env   # sesuaikan konfigurasi database
+cp .env.example .env   # isi konfigurasi database & JWT_SECRET
 npm install
 npm run db:push         # buat tabel di database
 npm run dev             # jalankan server di port 3000
